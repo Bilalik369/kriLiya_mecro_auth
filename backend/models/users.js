@@ -77,7 +77,9 @@ userSchema.pre("save", async function (next) {
   }
 })
 
-
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password)
+}
 
 userSchema.methods.toPublicProfile = function () {
   return {
