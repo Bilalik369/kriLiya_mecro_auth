@@ -125,4 +125,38 @@ export const getProfile = async (req, res) => {
   }
 };
 
+export const updateProfile = async (req, res) => {
+  try {
+    const { firstName, lastName, phone, address, profileImage } = req.body;
+
+   
+    const user = await User.findById(req.user.userId);
+
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (phone) user.phone = phone;
+    if (address) user.address = { ...user.address, ...address }; 
+    if (profileImage) user.profileImage = profileImage;
+
+    await user.save();
+
+  
+    return res.status(200).json({
+      success: true,
+      user: user.toPublicProfile ? user.toPublicProfile() : user, 
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error. Could not update profile.",
+    });
+  }
+};
+
+
 
