@@ -158,5 +158,40 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+export const getAllUsers = async (req, res) => {
+  try {
+    
+    const { page = 1, limit = 10, role, isActive } = req.query;
 
+    const filter = {};
+
+    if (role) filter.role = role;
+    if (isActive !== undefined) filter.isActive = isActive === "true";
+
+    const users = await User.find(filter)
+      .limit(Number(limit)) 
+      .skip((Number(page) - 1) * Number(limit))
+      .sort({ createdAt: -1 });
+
+  
+    const count = await User.countDocuments(filter);
+
+    
+    return res.status(200).json({
+      success: true,
+      users: users.map((u) =>
+        u.toPublicProfile ? u.toPublicProfile() : u
+      ),
+      totalPages: Math.ceil(count / limit),
+      currentPage: Number(page),
+      totalUsers: count,
+    });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error. Could not fetch users.",
+    });
+  }
+};
 
