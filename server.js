@@ -13,7 +13,7 @@
 
   const PORT = process.env.PORT
 
-  app.use("/api/auth", authRoutes);
+  app.use(authRoutes);
 
 
   connectdb()
