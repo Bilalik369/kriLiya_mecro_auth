@@ -125,6 +125,34 @@ export const getProfile = async (req, res) => {
   }
 };
 
+
+export const getUserById = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+   
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        msg: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: user.toPublicProfile ? user.toPublicProfile() : user,
+    });
+  } catch (error) {
+    console.error("Error fetching user by ID:", error);
+    return res.status(500).json({
+      success: false,
+      msg: "Server error while fetching user",
+    });
+  }
+};
+
 export const updateProfile = async (req, res) => {
   try {
     const { firstName, lastName, phone, address, profileImage } = req.body;
