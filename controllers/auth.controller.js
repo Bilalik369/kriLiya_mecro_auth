@@ -1,5 +1,6 @@
 import User from "../models/users.js";
 import jwt from "jsonwebtoken";
+import axios from "axios";
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -39,6 +40,16 @@ export const register = async (req, res) => {
 
     await user.save();
 
+    try {
+      await axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/welcome`, {
+       email: user.email,
+       userName: `${user.firstName} ${user.lastName}`
+        });
+    } catch (err) {
+  console.error("Notification Service Error:", err.message);
+  }
+
+  
     const token = generateToken(user);
 
     res.status(201).json({
