@@ -3,11 +3,13 @@ import jwt from "jsonwebtoken";
 import axios from "axios";
 
 const generateToken = (user) => {
+  const displayName = `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
   return jwt.sign(
     {
       userId: user._id,
       email: user.email,
       role: user.role,
+      userName: displayName,
     },
     process.env.JWT_SECRET,
     {
@@ -40,7 +42,7 @@ export const register = async (req, res) => {
 
     await user.save();
 
-    // Do not block registration response on email notification.
+  
     if (process.env.NOTIFICATION_SERVICE_URL) {
       axios
         .post(
