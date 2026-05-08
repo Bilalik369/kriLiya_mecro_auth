@@ -40,16 +40,22 @@ export const register = async (req, res) => {
 
     await user.save();
 
-    try {
-      await axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/welcome`, {
-       email: user.email,
-       userName: `${user.firstName} ${user.lastName}`
+    // Do not block registration response on email notification.
+    if (process.env.NOTIFICATION_SERVICE_URL) {
+      axios
+        .post(
+          `${process.env.NOTIFICATION_SERVICE_URL}/welcome`,
+          {
+            email: user.email,
+            userName: `${user.firstName} ${user.lastName}`,
+          },
+          { timeout: 8000 }
+        )
+        .catch((err) => {
+          console.error("Notification Service Error:", err.message);
         });
-    } catch (err) {
-  console.error("Notification Service Error:", err.message);
-  }
+    }
 
-  
     const token = generateToken(user);
 
     res.status(201).json({
